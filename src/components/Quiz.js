@@ -32,6 +32,7 @@ export default function Quiz() {
     React.useEffect(() => {
         fetch("https://opentdb.com/api.php?amount=5&difficulty=medium&type=multiple").then(res => res.json()).then(data => {
             const items = data.results;
+            const correct_ans_id = nanoid();
             //Add new items to each question object [ID, answer IDs, isSelected(bool)]
             const q_objects = items.map(
                 q => {
@@ -47,7 +48,7 @@ export default function Quiz() {
                     answerList.push({
                         text: he.decode(q.correct_answer),
                         isSelected: false,
-                        id: nanoid()
+                        id: correct_ans_id
                     })
                     return (
                         {
@@ -55,19 +56,10 @@ export default function Quiz() {
                             question: he.decode(q.question),
                             id: nanoid(),
                             answers: shuffle(answerList),
-                            incorrect_answers: q.incorrect_answers.map(a => {
-                                return (
-                                    {
-                                        text: he.decode(a),
-                                        isSelected: false,
-                                        id: nanoid()
-                                    }
-                                )
-                            }),
                             correct_answer: {
                                 text: he.decode(q.correct_answer),
                                 isSelected: false,
-                                id: nanoid()
+                                id: correct_ans_id
                             }
                         }
                     )
@@ -79,7 +71,7 @@ export default function Quiz() {
             setNewGame(false);
         })
     }, [newGame])
-    console.log(questions)
+
     function loadQuestions() {
         if (!completed && !newGame) {
             setCompleted(true);
@@ -116,7 +108,8 @@ export default function Quiz() {
                                     return (
                                         {
                                             ...q,
-                                            incorrect_answers: q.incorrect_answers.map(
+
+                                            answers: q.answers.map(
                                                 a => {
                                                     return (
                                                         {
@@ -126,11 +119,6 @@ export default function Quiz() {
                                                     )
                                                 }
                                             ),
-                                            correct_answer: {
-                                                ...q.correct_answer,
-                                                isSelected: q.correct_answer.id === a_id ? true : false
-                                            }
-
                                         }
                                     )
                                 }
@@ -149,10 +137,16 @@ export default function Quiz() {
     function countPoints() {
         let count = 0;
         for (let i = 0; i < questions.length; i++) {
-            if (questions[i].correct_answer.isSelected) {
-                count++;
+            for (let k = 0; k < questions[i].answers.length; k++) {
+                if (questions[i].answers[k].isSelected) {
+                    if (questions[i].answers[k].id === questions[i].correct_answer.id) {
+                        count++;
+                    }
+                }
             }
         }
+
+
         window.points = count;
         return (window.points)
 

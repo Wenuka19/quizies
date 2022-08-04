@@ -47,11 +47,7 @@ export default function Question(props) {
         }
     }
 
-
-
-
-    console.log("Completed in question:", props.checking)
-    const answerList = [...props.obj.incorrect_answers, props.obj.correct_answer];
+    const answerList = props.obj.answers;
     const answerComponents = answerList.map(q => <p key={q.id} style={checkStyle(q.isSelected, q.id, props.obj.correct_answer.id)} onClick={() => props.toSelect(props.obj.id, q.id)}>{q.text}</p>)
     return (
         <div className='question-box'>
